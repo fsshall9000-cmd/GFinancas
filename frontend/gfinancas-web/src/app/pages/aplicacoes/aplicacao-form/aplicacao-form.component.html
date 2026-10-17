@@ -1,0 +1,305 @@
+<div class="container app-page">
+
+  <div class="mb-4 page-header">
+
+    <h2>
+      {{ modoEdicao
+        ? 'Editar aplicação'
+        : 'Nova aplicação'
+      }}
+    </h2>
+
+    <p class="text-muted">
+      {{
+        modoEdicao
+          ? 'Atualize os dados da sua aplicação financeira.'
+          : 'Cadastre um novo investimento.'
+      }}
+    </p>
+
+  </div>
+
+
+  @if (mensagemErro) {
+
+    <div class="alert alert-danger">
+      {{ mensagemErro }}
+    </div>
+
+  }
+
+
+  @if (carregando) {
+
+    <div class="text-center py-5">
+
+      <div
+        class="spinner-border"
+        role="status">
+      </div>
+
+      <p class="text-muted mt-2">
+        Carregando aplicação...
+      </p>
+
+    </div>
+
+  } @else {
+
+    <div class="card shadow-sm">
+
+      <div class="card-body">
+
+        <form
+          [formGroup]="formulario"
+          (ngSubmit)="salvar()">
+
+
+          <!-- NOME -->
+
+          <div class="mb-3">
+
+            <label
+              for="nome"
+              class="form-label">
+
+              Nome da aplicação
+
+            </label>
+
+            <input
+              id="nome"
+              type="text"
+              class="form-control"
+              formControlName="nome"
+              [class.is-invalid]="campoInvalido('nome')"
+              placeholder="Ex.: Tesouro Selic 2029">
+
+            @if (campoInvalido('nome')) {
+
+              <div class="invalid-feedback">
+                Informe o nome da aplicação.
+              </div>
+
+            }
+
+          </div>
+
+
+          <div class="row">
+
+
+            <!-- TIPO -->
+
+            <div class="col-md-6 mb-3">
+
+              <label
+                for="tipo"
+                class="form-label">
+
+                Tipo
+
+              </label>
+
+              <select
+                id="tipo"
+                class="form-select"
+                formControlName="tipo"
+                [class.is-invalid]="campoInvalido('tipo')">
+
+                <option
+                  [ngValue]="null">
+
+                  Selecione...
+
+                </option>
+
+                @for (
+                  tipo of tiposAplicacao;
+                  track tipo.valor
+                ) {
+
+                  <option
+                    [ngValue]="tipo.valor">
+
+                    {{ tipo.descricao }}
+
+                  </option>
+
+                }
+
+              </select>
+
+              @if (campoInvalido('tipo')) {
+
+                <div class="invalid-feedback">
+                  Selecione o tipo da aplicação.
+                </div>
+
+              }
+
+            </div>
+
+
+            <!-- DATA -->
+
+            <div class="col-md-6 mb-3">
+
+              <label
+                for="dataInicio"
+                class="form-label">
+
+                Data de início
+
+              </label>
+
+              <input
+                id="dataInicio"
+                type="date"
+                class="form-control"
+                formControlName="dataInicio"
+                [class.is-invalid]="
+                  campoInvalido('dataInicio')
+                ">
+
+              @if (campoInvalido('dataInicio')) {
+
+                <div class="invalid-feedback">
+                  Informe a data de início.
+                </div>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <!-- INSTITUIÇÃO -->
+
+          <div class="mb-3">
+
+            <label
+              for="instituicao"
+              class="form-label">
+
+              Instituição
+
+            </label>
+
+            <input
+              id="instituicao"
+              type="text"
+              class="form-control"
+              formControlName="instituicao"
+              [class.is-invalid]="
+                campoInvalido('instituicao')
+              "
+              placeholder="Ex.: XP Investimentos">
+
+            @if (campoInvalido('instituicao')) {
+
+              <div class="invalid-feedback">
+                Informe a instituição.
+              </div>
+
+            }
+
+          </div>
+
+
+          <!-- VALOR ATUAL
+               aparece somente na edição -->
+
+          @if (modoEdicao) {
+
+            <div class="mb-3">
+
+              <label
+                for="valorAtual"
+                class="form-label">
+
+                Valor atual
+
+              </label>
+
+              <div class="input-group">
+
+                <span class="input-group-text">
+                  R$
+                </span>
+
+                <input
+                  id="valorAtual"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="form-control"
+                  formControlName="valorAtual"
+                  [class.is-invalid]="
+                    campoInvalido('valorAtual')
+                  ">
+
+              </div>
+
+              <div class="form-text">
+                Informe o valor de mercado atual
+                da aplicação.
+              </div>
+
+            </div>
+
+          }
+
+
+          <!-- BOTÕES -->
+
+          <div
+            class="d-flex justify-content-end
+                   gap-2 mt-4">
+
+            <a
+              routerLink="/aplicacoes"
+              class="btn btn-outline-secondary">
+
+              Cancelar
+
+            </a>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="salvando">
+
+              @if (salvando) {
+
+                <span
+                  class="spinner-border
+                         spinner-border-sm me-2">
+                </span>
+
+                Salvando...
+
+              } @else {
+
+                {{
+                  modoEdicao
+                    ? 'Salvar alterações'
+                    : 'Cadastrar aplicação'
+                }}
+
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

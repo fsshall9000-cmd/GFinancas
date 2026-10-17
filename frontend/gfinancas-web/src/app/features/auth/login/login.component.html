@@ -1,0 +1,87 @@
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center login-page">
+  <div class="card login-card">
+    <div class="card-body">
+      <span class="login-eyebrow">GESTÃO FINANCEIRA</span>
+      <h1 class="text-center mb-2">GFinanças</h1>
+      <h2 class="text-center mb-4 auth-title">
+        @switch (modo) {
+          @case ('login') { Entre na sua conta }
+          @case ('cadastro') { Cadastrar usuário }
+          @case ('recuperacao') { Esqueceu a senha? }
+          @case ('redefinicao') { Defina sua nova senha }
+        }
+      </h2>
+      @if (erro) { <div class="alert alert-danger" role="alert">{{ erro }}</div> }
+      @if (mensagem) { <div class="alert alert-success" role="status">{{ mensagem }}</div> }
+
+      @if (modo === 'login') {
+        <form [formGroup]="loginForm" (ngSubmit)="entrar()">
+          <div class="mb-3">
+            <label for="email" class="form-label">E-mail</label>
+            <input id="email" type="email" class="form-control" formControlName="email" autocomplete="email" placeholder="seu@email.com">
+          </div>
+          <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <input id="senha" type="password" class="form-control" formControlName="senha" autocomplete="current-password" placeholder="Digite sua senha">
+          </div>
+          <button type="button" class="btn btn-link auth-link mb-3" [disabled]="carregando" (click)="alterarModo('recuperacao')">Esqueceu a senha?</button>
+          <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid || carregando">{{ carregando ? 'Entrando...' : 'Entrar' }}</button>
+          <button type="button" class="btn btn-outline-primary w-100 mt-3" [disabled]="carregando" (click)="alterarModo('cadastro')">Cadastrar usuário</button>
+        </form>
+      }
+
+      @if (modo === 'cadastro') {
+        <form [formGroup]="cadastroForm" (ngSubmit)="cadastrar()">
+          <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input id="nome" class="form-control" formControlName="nome" autocomplete="name" maxlength="150" placeholder="Seu nome">
+          </div>
+          <div class="mb-3">
+            <label for="cadastro-email" class="form-label">E-mail</label>
+            <input id="cadastro-email" type="email" class="form-control" formControlName="email" autocomplete="email" maxlength="254" placeholder="seu@email.com">
+          </div>
+          <div class="mb-3">
+            <label for="cadastro-senha" class="form-label">Senha</label>
+            <input id="cadastro-senha" type="password" class="form-control" formControlName="senha" autocomplete="new-password" aria-describedby="cadastro-senha-ajuda">
+            <small id="cadastro-senha-ajuda" class="text-muted">Use entre 8 e 128 caracteres.</small>
+          </div>
+          <div class="mb-4">
+            <label for="cadastro-confirmacao" class="form-label">Confirmar senha</label>
+            <input id="cadastro-confirmacao" type="password" class="form-control" formControlName="confirmacao" autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn btn-primary w-100" [disabled]="cadastroForm.invalid || carregando">{{ carregando ? 'Cadastrando...' : 'Cadastrar' }}</button>
+        </form>
+      }
+
+      @if (modo === 'recuperacao') {
+        <p class="text-muted">Informe seu e-mail para receber um link e definir uma nova senha.</p>
+        <form [formGroup]="recuperacaoForm" (ngSubmit)="recuperarSenha()">
+          <div class="mb-4">
+            <label for="recuperacao-email" class="form-label">E-mail</label>
+            <input id="recuperacao-email" type="email" class="form-control" formControlName="email" autocomplete="email" maxlength="254" placeholder="seu@email.com">
+          </div>
+          <button type="submit" class="btn btn-primary w-100" [disabled]="recuperacaoForm.invalid || carregando">{{ carregando ? 'Enviando...' : 'Enviar link de recuperação' }}</button>
+        </form>
+      }
+
+      @if (modo === 'redefinicao') {
+        <form [formGroup]="redefinicaoForm" (ngSubmit)="redefinirSenha()">
+          <div class="mb-3">
+            <label for="nova-senha" class="form-label">Nova senha</label>
+            <input id="nova-senha" type="password" class="form-control" formControlName="senha" autocomplete="new-password" aria-describedby="nova-senha-ajuda">
+            <small id="nova-senha-ajuda" class="text-muted">Use entre 8 e 128 caracteres.</small>
+          </div>
+          <div class="mb-4">
+            <label for="nova-confirmacao" class="form-label">Confirmar nova senha</label>
+            <input id="nova-confirmacao" type="password" class="form-control" formControlName="confirmacao" autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn btn-primary w-100" [disabled]="redefinicaoForm.invalid || carregando">{{ carregando ? 'Atualizando...' : 'Atualizar senha' }}</button>
+        </form>
+      }
+
+      @if (modo !== 'login') {
+        <button type="button" class="btn btn-link w-100 mt-3" [disabled]="carregando" (click)="alterarModo('login')">Voltar ao login</button>
+      }
+    </div>
+  </div>
+</div>

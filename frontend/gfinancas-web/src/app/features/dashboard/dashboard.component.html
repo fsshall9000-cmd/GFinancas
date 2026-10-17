@@ -1,0 +1,1993 @@
+<div class="container dashboard-shell">
+
+  <!-- ====================================================== -->
+  <!-- CABEÇALHO -->
+  <!-- ====================================================== -->
+
+  <header class="dashboard-header">
+
+    <div>
+
+      <span class="dashboard-eyebrow">
+        GESTÃO FINANCEIRA
+      </span>
+
+      <h1>
+        {{ tituloDashboard }}
+      </h1>
+
+      <p class="text-muted mb-0">
+
+        {{ descricaoDashboard }}
+
+        —
+
+        {{ meses[periodo.mes - 1] }}
+
+        de
+
+        {{ periodo.ano }}
+
+      </p>
+
+    </div>
+
+    <span class="period-badge">
+      {{ meses[periodo.mes - 1] }} / {{ periodo.ano }}
+    </span>
+
+  </header>
+
+
+  <!-- ====================================================== -->
+  <!-- FILTRO DE PERÍODO -->
+  <!-- ====================================================== -->
+
+  <form
+    class="row g-3 align-items-end period-filter"
+    (ngSubmit)="verificarPeriodo()"
+    aria-label="Selecionar período">
+
+    <div class="col-12 col-sm-4 col-lg-3">
+
+      <label
+        for="dashboard-mes"
+        class="form-label">
+
+        Mês
+
+      </label>
+
+      <select
+        id="dashboard-mes"
+        name="mes"
+        class="form-select"
+        [(ngModel)]="filtroMes"
+        required>
+
+        @for (
+          mes of meses;
+          track $index
+        ) {
+
+          <option [ngValue]="$index + 1">
+            {{ mes }}
+          </option>
+
+        }
+
+      </select>
+
+    </div>
+
+
+    <div class="col-12 col-sm-4 col-lg-2">
+
+      <label
+        for="dashboard-ano"
+        class="form-label">
+
+        Ano
+
+      </label>
+
+      <input
+        id="dashboard-ano"
+        name="ano"
+        class="form-control"
+        type="number"
+        min="1"
+        max="9999"
+        step="1"
+        required
+        [(ngModel)]="filtroAno">
+
+    </div>
+
+
+    <div class="col-12 col-sm-auto">
+
+      <button
+        class="btn btn-primary"
+        type="submit">
+
+        Atualizar painel
+
+      </button>
+
+    </div>
+
+
+    @if (erroPeriodo) {
+
+      <div class="col-12">
+
+        <p
+          class="text-danger mb-0"
+          role="alert">
+
+          {{ erroPeriodo }}
+
+        </p>
+
+      </div>
+
+    }
+
+  </form>
+
+
+  <p
+    class="text-muted small selected-period"
+    role="status">
+
+    Período selecionado:
+
+    {{ meses[periodo.mes - 1] }}
+
+    de
+
+    {{ periodo.ano }}.
+
+  </p>
+
+
+  <!-- ====================================================== -->
+  <!-- NAVEGAÇÃO ENTRE DASHBOARDS -->
+  <!-- ====================================================== -->
+
+  <nav
+    class="dashboard-tabs"
+    aria-label="Dashboards">
+
+    @for (
+      opcao of opcoesDashboard;
+      track opcao.caminho
+    ) {
+
+      <a
+        class="dashboard-tab"
+        [routerLink]="opcao.caminho"
+        [queryParams]="periodo"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{
+          paths: 'exact',
+          queryParams: 'ignored',
+          matrixParams: 'ignored',
+          fragment: 'ignored'
+        }"
+        ariaCurrentWhenActive="page">
+
+        {{ opcao.titulo }}
+
+      </a>
+
+    }
+
+  </nav>
+
+
+  @if (visao !== 'orcamentos') {
+
+    <p class="data-note">
+
+      Saldos de contas, patrimônio e investimentos
+      representam a posição atual.
+
+      Os filtros de mês e ano são utilizados
+      nos indicadores que possuem histórico.
+
+    </p>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- VISÃO GERAL / FINANCEIRO -->
+  <!-- RESUMO FINANCEIRO -->
+  <!-- ====================================================== -->
+
+  @if (
+    visao === 'sintetico' ||
+    visao === 'financeiro'
+  ) {
+
+    @if (resumo) {
+
+      <div class="row g-4">
+
+        <!-- RECEITAS -->
+
+        <div class="col-md-6 col-xl-3">
+
+          <div class="card metric-card h-100">
+
+            <div class="card-body">
+
+              <span
+                class="metric-icon income"
+                aria-hidden="true">
+                ↗
+              </span>
+
+              <h6 class="text-muted">
+                Receitas do mês
+              </h6>
+
+              <h3 class="text-success">
+
+                {{
+                  resumo.totalReceitas
+                    | currency:
+                      'BRL':
+                      'symbol':
+                      '1.2-2':
+                      'pt-BR'
+                }}
+
+              </h3>
+
+              <p class="metric-caption">
+                Entradas no período
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- DESPESAS -->
+
+        <div class="col-md-6 col-xl-3">
+
+          <div class="card metric-card h-100">
+
+            <div class="card-body">
+
+              <span
+                class="metric-icon expense"
+                aria-hidden="true">
+                ↘
+              </span>
+
+              <h6 class="text-muted">
+                Despesas do mês
+              </h6>
+
+              <h3 class="text-danger">
+
+                {{
+                  resumo.totalDespesas
+                    | currency:
+                      'BRL':
+                      'symbol':
+                      '1.2-2':
+                      'pt-BR'
+                }}
+
+              </h3>
+
+              <p class="metric-caption">
+                Saídas no período
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- BALANÇO -->
+
+        <div class="col-md-6 col-xl-3">
+
+          <div class="card metric-card h-100">
+
+            <div class="card-body">
+
+              <span
+                class="metric-icon balance"
+                aria-hidden="true">
+                ⇄
+              </span>
+
+              <h6 class="text-muted">
+                Balanço do mês
+              </h6>
+
+              <h3
+                [class.text-success]="
+                  resumo.resultadoMes >= 0
+                "
+                [class.text-danger]="
+                  resumo.resultadoMes < 0
+                ">
+
+                {{
+                  resumo.resultadoMes
+                    | currency:
+                      'BRL':
+                      'symbol':
+                      '1.2-2':
+                      'pt-BR'
+                }}
+
+              </h3>
+
+              <p class="metric-caption">
+                Receitas menos despesas
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- SALDO ATUAL -->
+
+        <div class="col-md-6 col-xl-3">
+
+          <div class="card metric-card h-100">
+
+            <div class="card-body">
+
+              <span
+                class="metric-icon cash"
+                aria-hidden="true">
+                ▤
+              </span>
+
+              <h6 class="text-muted">
+                Saldo atual
+              </h6>
+
+              @if (erroContas) {
+
+                <span class="text-danger">
+                  Saldo indisponível
+                </span>
+
+              }
+              @else if (carregandoContas) {
+
+                <span class="text-muted">
+                  Carregando...
+                </span>
+
+              }
+              @else {
+
+                <h3
+                  class="mb-0"
+                  [class.text-success]="
+                    saldoTotal >= 0
+                  "
+                  [class.text-danger]="
+                    saldoTotal < 0
+                  ">
+
+                  {{
+                    saldoTotal
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </h3>
+
+              }
+
+              <p class="metric-caption">
+                Posição atual das contas
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <p class="transaction-summary mt-3 mb-0">
+
+        Transações no mês:
+
+        <strong>
+          {{ resumo.quantidadeTransacoes }}
+        </strong>
+
+      </p>
+
+    }
+    @else if (erroResumo) {
+
+      <div
+        class="alert alert-danger"
+        role="alert">
+
+        {{ erroResumo }}
+
+      </div>
+
+    }
+    @else {
+
+      <div
+        class="alert alert-info"
+        role="status">
+
+        Carregando resumo financeiro...
+
+      </div>
+
+    }
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- PATRIMÔNIO -->
+  <!-- VISÃO GERAL + VISÃO PATRIMONIAL -->
+  <!-- ====================================================== -->
+
+  @if (
+    visao === 'sintetico' ||
+    visao === 'patrimonio'
+  ) {
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-patrimonio">
+
+      <div class="card-body">
+
+        <h5
+          id="titulo-patrimonio"
+          class="mb-3">
+
+          Patrimônio financeiro
+
+        </h5>
+
+
+        @if (erroPatrimonio) {
+
+          <div
+            class="alert alert-danger mb-0"
+            role="alert">
+
+            {{ erroPatrimonio }}
+
+          </div>
+
+        }
+        @else if (
+          carregandoPatrimonio ||
+          !resumoPatrimonio
+        ) {
+
+          <p
+            class="text-muted mb-0"
+            role="status">
+
+            Carregando patrimônio...
+
+          </p>
+
+        }
+        @else {
+
+          <div class="row g-3">
+
+            <!-- PATRIMÔNIO TOTAL -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Patrimônio total
+                </div>
+
+                <h3
+                  class="mb-0"
+                  [class.text-success]="
+                    resumoPatrimonio.patrimonioTotal >= 0
+                  "
+                  [class.text-danger]="
+                    resumoPatrimonio.patrimonioTotal < 0
+                  ">
+
+                  {{
+                    resumoPatrimonio.patrimonioTotal
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </h3>
+
+              </div>
+
+            </div>
+
+
+            <!-- CONTAS -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Saldo em contas
+                </div>
+
+                <h4
+                  class="mb-0"
+                  [class.text-success]="
+                    resumoPatrimonio.saldoContas >= 0
+                  "
+                  [class.text-danger]="
+                    resumoPatrimonio.saldoContas < 0
+                  ">
+
+                  {{
+                    resumoPatrimonio.saldoContas
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </h4>
+
+              </div>
+
+            </div>
+
+
+            <!-- INVESTIMENTOS -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Investimentos
+                </div>
+
+                <h4 class="mb-0">
+
+                  {{
+                    resumoPatrimonio.valorInvestimentos
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </h4>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- VISÃO FINANCEIRA -->
+  <!-- ====================================================== -->
+
+  @if (visao === 'financeiro') {
+
+    <!-- DESPESAS POR CATEGORIA -->
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-despesas-categoria">
+
+      <div class="card-body">
+
+        <h5
+          id="titulo-despesas-categoria"
+          class="card-title mb-1">
+
+          Despesas por categoria
+
+        </h5>
+
+        <p class="text-muted mb-4">
+
+          Distribuição das despesas no período selecionado
+
+        </p>
+
+
+        @if (erroCategorias) {
+
+          <div
+            class="alert alert-danger"
+            role="alert">
+
+            {{ erroCategorias }}
+
+          </div>
+
+        }
+        @else if (carregandoCategorias) {
+
+          <p
+            class="text-muted"
+            role="status">
+
+            Carregando despesas por categoria...
+
+          </p>
+
+        }
+        @else if (despesasPorCategoria.length) {
+
+          <div
+            class="mx-auto"
+            style="max-width: 420px">
+
+            <canvas
+              baseChart
+              [data]="graficoDespesas"
+              [options]="opcoesRosca"
+              [type]="'doughnut'"
+              role="img"
+              aria-label="Despesas distribuídas por categoria">
+
+            </canvas>
+
+          </div>
+
+        }
+        @else {
+
+          <div class="alert alert-light mb-0">
+
+            Nenhuma despesa encontrada
+            neste período.
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- HISTÓRICO MENSAL -->
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-historico">
+
+      <div class="card-body">
+
+        <h5
+          id="titulo-historico"
+          class="card-title mb-1">
+
+          Receitas e despesas
+
+        </h5>
+
+        <p class="text-muted mb-4">
+
+          Evolução financeira durante
+          {{ periodo.ano }}
+
+        </p>
+
+
+        @if (erroHistorico) {
+
+          <div
+            class="alert alert-danger"
+            role="alert">
+
+            {{ erroHistorico }}
+
+          </div>
+
+        }
+        @else if (carregandoHistorico) {
+
+          <p
+            class="text-muted"
+            role="status">
+
+            Carregando histórico financeiro...
+
+          </p>
+
+        }
+        @else if (historicoMensal.length) {
+
+          <div
+            style="
+              position: relative;
+              width: 100%;
+              height: 380px;
+            ">
+
+            <canvas
+              baseChart
+              [data]="graficoHistorico"
+              [options]="opcoesHistorico"
+              [type]="'bar'"
+              role="img"
+              aria-label="Histórico mensal de receitas e despesas">
+
+            </canvas>
+
+          </div>
+
+        }
+        @else {
+
+          <div class="alert alert-light mb-0">
+
+            Ainda não existem dados
+            suficientes para o histórico.
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- ORÇAMENTOS -->
+  <!-- ====================================================== -->
+
+  @if (visao === 'orcamentos') {
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-orcamentos">
+
+      <div class="card-body">
+
+        <div
+          class="
+            d-flex
+            justify-content-between
+            align-items-center
+            flex-wrap
+            gap-2
+            mb-4
+          ">
+
+          <div>
+
+            <h5
+              id="titulo-orcamentos"
+              class="mb-1">
+
+              Orçamentos
+
+            </h5>
+
+            <p class="text-muted mb-0">
+
+              Planejamento financeiro de
+              {{ meses[periodo.mes - 1] }}
+              de
+              {{ periodo.ano }}
+
+            </p>
+
+          </div>
+
+
+          <a
+            routerLink="/orcamentos/novo"
+            [queryParams]="periodo"
+            class="btn btn-outline-primary btn-sm">
+
+            Novo orçamento
+
+          </a>
+
+        </div>
+
+
+        @if (erroOrcamentos) {
+
+          <div
+            class="alert alert-danger"
+            role="alert">
+
+            {{ erroOrcamentos }}
+
+          </div>
+
+        }
+        @else if (carregandoOrcamentos) {
+
+          <p
+            class="text-muted"
+            role="status">
+
+            Carregando orçamentos...
+
+          </p>
+
+        }
+        @else if (orcamentos.length) {
+
+          <!-- RESUMO -->
+
+          <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <small class="text-muted">
+                  Planejado
+                </small>
+
+                <div class="fw-bold">
+
+                  {{
+                    totalPlanejado
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <small class="text-muted">
+                  Gasto
+                </small>
+
+                <div class="fw-bold">
+
+                  {{
+                    totalGasto
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <small class="text-muted">
+                  Disponível
+                </small>
+
+                <div
+                  class="fw-bold"
+                  [class.text-success]="
+                    totalDisponivel >= 0
+                  "
+                  [class.text-danger]="
+                    totalDisponivel < 0
+                  ">
+
+                  {{
+                    totalDisponivel
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- LISTAGEM -->
+
+          <div class="row g-3">
+
+            @for (
+              orcamento of orcamentos;
+              track orcamento.id
+            ) {
+
+              <div class="col-md-6">
+
+                <div
+                  class="border rounded p-3 h-100">
+
+                  <div
+                    class="
+                      d-flex
+                      justify-content-between
+                      gap-3
+                    ">
+
+                    <div>
+
+                      <strong>
+                        {{ orcamento.categoria }}
+                      </strong>
+
+                      <div class="text-muted small">
+
+                        Limite:
+
+                        {{
+                          orcamento.valorLimite
+                            | currency:
+                              'BRL':
+                              'symbol':
+                              '1.2-2':
+                              'pt-BR'
+                        }}
+
+                      </div>
+
+                    </div>
+
+
+                    <strong>
+
+                      {{
+                        orcamento.percentualUtilizado
+                          | number:'1.0-1'
+                      }}%
+
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    class="progress mt-3"
+                    role="progressbar"
+                    [attr.aria-valuenow]="
+                      larguraProgresso(
+                        orcamento.percentualUtilizado
+                      )
+                    "
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+
+                    <div
+                      class="progress-bar"
+                      [class.bg-danger]="
+                        orcamento.valorGasto >
+                        orcamento.valorLimite
+                      "
+                      [style.width.%]="
+                        larguraProgresso(
+                          orcamento.percentualUtilizado
+                        )
+                      ">
+
+                    </div>
+
+                  </div>
+
+
+                  <div
+                    class="
+                      d-flex
+                      justify-content-between
+                      mt-2
+                    ">
+
+                    <small>
+
+                      Gasto:
+
+                      {{
+                        orcamento.valorGasto
+                          | currency:
+                            'BRL':
+                            'symbol':
+                            '1.2-2':
+                            'pt-BR'
+                      }}
+
+                    </small>
+
+
+                    <small>
+
+                      Disponível:
+
+                      {{
+                        orcamento.valorDisponivel
+                          | currency:
+                            'BRL':
+                            'symbol':
+                            '1.2-2':
+                            'pt-BR'
+                      }}
+
+                    </small>
+
+                  </div>
+
+
+                  @if (
+                    orcamento.valorGasto >
+                    orcamento.valorLimite
+                  ) {
+
+                    <div
+                      class="text-danger small mt-1">
+
+                      Limite excedido
+
+                    </div>
+
+                  }
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        }
+        @else {
+
+          <div class="alert alert-light">
+
+            Nenhum orçamento cadastrado
+            neste mês.
+
+          </div>
+
+
+          <a
+            routerLink="/orcamentos/novo"
+            [queryParams]="periodo"
+            class="btn btn-primary btn-sm">
+
+            Criar orçamento
+
+          </a>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+
+  <!-- ====================================================== -->
+  <!-- PATRIMÔNIO E INVESTIMENTOS -->
+  <!-- ====================================================== -->
+
+  @if (visao === 'patrimonio') {
+
+
+    <!-- ==================================================== -->
+    <!-- INVESTIMENTOS -->
+    <!-- ==================================================== -->
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-investimentos">
+
+      <div class="card-body">
+
+        <div
+          class="
+            d-flex
+            justify-content-between
+            align-items-center
+            flex-wrap
+            gap-2
+            mb-4
+          ">
+
+          <div>
+
+            <h5
+              id="titulo-investimentos"
+              class="mb-1">
+
+              Investimentos
+
+            </h5>
+
+            <p class="text-muted mb-0">
+
+              Resumo da sua carteira
+              de investimentos
+
+            </p>
+
+          </div>
+
+
+          <a
+            routerLink="/aplicacoes"
+            class="btn btn-outline-primary btn-sm">
+
+            Ver investimentos
+
+          </a>
+
+        </div>
+
+
+        @if (erroInvestimentos) {
+
+          <div
+            class="alert alert-danger"
+            role="alert">
+
+            {{ erroInvestimentos }}
+
+          </div>
+
+        }
+        @else if (
+          carregandoInvestimentos ||
+          !resumoInvestimentos
+        ) {
+
+          <p
+            class="text-muted"
+            role="status">
+
+            Carregando investimentos...
+
+          </p>
+
+        }
+        @else if (resumoInvestimentos) {
+
+          <div class="row g-3">
+
+            <!-- VALOR ATUAL -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Valor atual
+                </div>
+
+                <strong>
+
+                  {{
+                    resumoInvestimentos.valorAtual
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- TOTAL APORTADO -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Total aportado
+                </div>
+
+                <strong>
+
+                  {{
+                    resumoInvestimentos.totalAportado
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- TOTAL RESGATADO -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Total resgatado
+                </div>
+
+                <strong>
+
+                  {{
+                    resumoInvestimentos.totalResgatado
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- RESULTADO -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Resultado
+                </div>
+
+                <strong
+                  [class.text-success]="
+                    resumoInvestimentos.resultado >= 0
+                  "
+                  [class.text-danger]="
+                    resumoInvestimentos.resultado < 0
+                  ">
+
+                  {{
+                    resumoInvestimentos.resultado
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- RENTABILIDADE -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Rentabilidade
+                </div>
+
+                <strong
+                  [class.text-success]="
+                    resumoInvestimentos
+                      .rentabilidadePercentual >= 0
+                  "
+                  [class.text-danger]="
+                    resumoInvestimentos
+                      .rentabilidadePercentual < 0
+                  ">
+
+                  {{
+                    resumoInvestimentos
+                      .rentabilidadePercentual
+                      | number:'1.2-2'
+                  }}%
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- CAPITAL LÍQUIDO -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Capital líquido
+                </div>
+
+                <strong>
+
+                  {{
+                    (
+                      resumoInvestimentos.totalAportado -
+                      resumoInvestimentos.totalResgatado
+                    )
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- APLICAÇÕES ATIVAS -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <div class="text-muted mb-1">
+                  Aplicações ativas
+                </div>
+
+                <strong>
+
+                  {{
+                    resumoInvestimentos
+                      .quantidadeAplicacoesAtivas
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        }
+        @else {
+
+          <div class="alert alert-light mb-0">
+
+            Nenhuma informação de
+            investimento encontrada.
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================== -->
+    <!-- COMPOSIÇÃO DO PATRIMÔNIO -->
+    <!-- ==================================================== -->
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-composicao-patrimonio">
+
+      <div class="card-body">
+
+        <h5
+          id="titulo-composicao-patrimonio"
+          class="card-title mb-1">
+
+          Composição do patrimônio
+
+        </h5>
+
+        <p class="text-muted mb-4">
+
+          Distribuição atual entre
+          contas e investimentos
+
+        </p>
+
+
+        @if (erroPatrimonio) {
+
+          <div
+            class="alert alert-danger"
+            role="alert">
+
+            {{ erroPatrimonio }}
+
+          </div>
+
+        }
+        @else if (
+          carregandoPatrimonio ||
+          !resumoPatrimonio
+        ) {
+
+          <p
+            class="text-muted"
+            role="status">
+
+            Carregando composição
+            do patrimônio...
+
+          </p>
+
+        }
+        @else {
+
+          @if (
+            resumoPatrimonio.saldoContas >= 0 &&
+            resumoPatrimonio.valorInvestimentos >= 0 &&
+            resumoPatrimonio.patrimonioTotal > 0
+          ) {
+
+            <div
+              class="mx-auto"
+              style="max-width: 380px">
+
+              <canvas
+                baseChart
+                [data]="graficoPatrimonio"
+                [options]="opcoesRosca"
+                [type]="'doughnut'"
+                role="img"
+                aria-label="Composição do patrimônio entre contas e investimentos">
+
+              </canvas>
+
+            </div>
+
+          }
+          @else if (
+            resumoPatrimonio.saldoContas < 0 ||
+            resumoPatrimonio.valorInvestimentos < 0
+          ) {
+
+            <div class="alert alert-warning">
+
+              O gráfico de composição não é
+              exibido porque existem valores
+              patrimoniais negativos.
+
+            </div>
+
+          }
+          @else {
+
+            <div class="alert alert-light">
+
+              Ainda não existem valores
+              para compor o patrimônio.
+
+            </div>
+
+          }
+
+
+          <div class="row text-center g-3 mt-3">
+
+            <!-- CONTAS -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <small class="text-muted">
+                  Contas
+                </small>
+
+                <div
+                  class="fw-bold"
+                  [class.text-success]="
+                    resumoPatrimonio.saldoContas >= 0
+                  "
+                  [class.text-danger]="
+                    resumoPatrimonio.saldoContas < 0
+                  ">
+
+                  {{
+                    resumoPatrimonio.saldoContas
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- INVESTIMENTOS -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <small class="text-muted">
+                  Investimentos
+                </small>
+
+                <div class="fw-bold">
+
+                  {{
+                    resumoPatrimonio.valorInvestimentos
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- TOTAL -->
+
+            <div class="col-md-4">
+
+              <div
+                class="border rounded p-3 h-100">
+
+                <small class="text-muted">
+                  Patrimônio total
+                </small>
+
+                <div
+                  class="fw-bold"
+                  [class.text-success]="
+                    resumoPatrimonio.patrimonioTotal >= 0
+                  "
+                  [class.text-danger]="
+                    resumoPatrimonio.patrimonioTotal < 0
+                  ">
+
+                  {{
+                    resumoPatrimonio.patrimonioTotal
+                      | currency:
+                        'BRL':
+                        'symbol':
+                        '1.2-2':
+                        'pt-BR'
+                  }}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================== -->
+    <!-- EVOLUÇÃO PATRIMONIAL -->
+    <!-- ==================================================== -->
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-evolucao-patrimonial">
+
+      <div class="card-body">
+
+        <div class="mb-4">
+
+          <h5
+            id="titulo-evolucao-patrimonial"
+            class="card-title mb-1">
+
+            Evolução patrimonial — {{ periodo.ano }}
+
+          </h5>
+
+          <p class="text-muted mb-0">
+
+            Evolução do saldo em contas,
+            investimentos e patrimônio total
+            ao longo do ano.
+
+          </p>
+
+        </div>
+
+
+        @if (erroEvolucaoPatrimonial) {
+
+          <div
+            class="alert alert-danger mb-0"
+            role="alert">
+
+            {{ erroEvolucaoPatrimonial }}
+
+          </div>
+
+        }
+        @else if (carregandoEvolucaoPatrimonial) {
+
+          <p
+            class="text-muted mb-0"
+            role="status">
+
+            Carregando evolução patrimonial...
+
+          </p>
+
+        }
+        @else if (evolucaoPatrimonial.length) {
+
+          <!-- GRÁFICO -->
+
+          <div
+            style="
+              position: relative;
+              width: 100%;
+              height: 380px;
+            ">
+
+            <canvas
+              baseChart
+              [data]="graficoEvolucaoPatrimonial"
+              [options]="opcoesEvolucaoPatrimonial"
+              [type]="'line'"
+              role="img"
+              aria-label="Gráfico da evolução patrimonial ao longo do ano">
+
+            </canvas>
+
+          </div>
+
+
+          <!-- VALORES MENSAIS -->
+
+          <div class="row g-3 mt-3">
+
+            @for (
+              item of evolucaoPatrimonial;
+              track item.mes
+            ) {
+
+              <div class="col-6 col-md-4 col-xl-3">
+
+                <div
+                  class="border rounded p-3 h-100">
+
+                  <small
+                    class="text-muted d-block mb-1">
+
+                    {{ item.mesNome }}
+
+                  </small>
+
+                  <strong
+                    [class.text-success]="
+                      item.patrimonioTotal >= 0
+                    "
+                    [class.text-danger]="
+                      item.patrimonioTotal < 0
+                    ">
+
+                    {{
+                      item.patrimonioTotal
+                        | currency:
+                          'BRL':
+                          'symbol':
+                          '1.2-2':
+                          'pt-BR'
+                    }}
+
+                  </strong>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        }
+        @else {
+
+          <div class="alert alert-light mb-0">
+
+            Ainda não existem dados históricos
+            suficientes para exibir a evolução
+            patrimonial.
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+    <!-- ==================================================== -->
+    <!-- CONTAS -->
+    <!-- ==================================================== -->
+
+    <section
+      class="card shadow-sm mt-4"
+      aria-labelledby="titulo-contas">
+
+      <div class="card-body">
+
+        <div
+          class="
+            d-flex
+            justify-content-between
+            align-items-center
+            flex-wrap
+            gap-2
+            mb-3
+          ">
+
+          <div>
+
+            <h5
+              id="titulo-contas"
+              class="mb-1">
+
+              Contas
+
+            </h5>
+
+            <p class="text-muted mb-0">
+
+              Posição atual das suas contas
+
+            </p>
+
+          </div>
+
+
+          <a
+            routerLink="/contas"
+            class="btn btn-outline-primary btn-sm">
+
+            Ver contas
+
+          </a>
+
+        </div>
+
+
+        @if (erroContas) {
+
+          <div
+            class="alert alert-danger"
+            role="alert">
+
+            {{ erroContas }}
+
+          </div>
+
+        }
+        @else if (carregandoContas) {
+
+          <p
+            class="text-muted"
+            role="status">
+
+            Carregando contas...
+
+          </p>
+
+        }
+        @else if (contas.length) {
+
+          <div class="row g-3">
+
+            @for (
+              conta of contas;
+              track conta.id
+            ) {
+
+              <div class="col-md-6 col-xl-4">
+
+                <div
+                  class="border rounded p-3 h-100">
+
+                  <div class="text-muted small mb-1">
+
+                    {{ conta.nome }}
+
+                  </div>
+
+                  <strong
+                    [class.text-success]="
+                      (conta.saldoAtual ?? 0) >= 0
+                    "
+                    [class.text-danger]="
+                      (conta.saldoAtual ?? 0) < 0
+                    ">
+
+                    {{
+                      (conta.saldoAtual ?? 0)
+                        | currency:
+                          'BRL':
+                          'symbol':
+                          '1.2-2':
+                          'pt-BR'
+                    }}
+
+                  </strong>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+
+          <div class="border-top mt-4 pt-3">
+
+            <div
+              class="
+                d-flex
+                justify-content-between
+                align-items-center
+              ">
+
+              <span class="text-muted">
+                Saldo total
+              </span>
+
+              <strong
+                [class.text-success]="
+                  saldoTotal >= 0
+                "
+                [class.text-danger]="
+                  saldoTotal < 0
+                ">
+
+                {{
+                  saldoTotal
+                    | currency:
+                      'BRL':
+                      'symbol':
+                      '1.2-2':
+                      'pt-BR'
+                }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+        }
+        @else {
+
+          <div class="alert alert-light mb-0">
+
+            Nenhuma conta cadastrada.
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+</div>

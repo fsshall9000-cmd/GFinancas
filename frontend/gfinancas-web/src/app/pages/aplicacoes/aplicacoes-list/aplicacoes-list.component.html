@@ -1,0 +1,261 @@
+<div class="container app-page">
+
+  <div
+    class="d-flex justify-content-between
+           align-items-center mb-4 page-header">
+
+    <div>
+      <h2 class="mb-1">
+        Investimentos
+      </h2>
+
+      <p class="text-muted mb-0">
+        Acompanhe suas aplicações financeiras.
+      </p>
+    </div>
+
+    <a
+      routerLink="/aplicacoes/nova"
+      class="btn btn-primary">
+
+      Nova aplicação
+
+    </a>
+
+  </div>
+
+
+  @if (mensagemErro) {
+
+    <div class="alert alert-danger">
+      {{ mensagemErro }}
+    </div>
+
+  }
+
+
+  @if (carregando) {
+
+    <div class="text-center py-5">
+
+      <div
+        class="spinner-border"
+        role="status">
+      </div>
+
+      <p class="mt-2 text-muted">
+        Carregando aplicações...
+      </p>
+
+    </div>
+
+  }
+
+
+  @if (!carregando && aplicacoes.length === 0) {
+
+    <div class="alert alert-light border">
+
+      Nenhuma aplicação financeira cadastrada.
+
+    </div>
+
+  }
+
+
+  @if (!carregando && aplicacoes.length > 0) {
+
+    <div class="table-responsive">
+
+      <table
+        class="table table-hover align-middle">
+
+        <thead>
+
+          <tr>
+            <th>Aplicação</th>
+            <th>Instituição</th>
+            <th>Tipo</th>
+
+            <th class="text-end">
+              Capital líquido
+            </th>
+
+            <th class="text-end">
+              Valor atual
+            </th>
+
+            <th class="text-end">
+              Resultado
+            </th>
+
+            <th class="text-end">
+              Rentabilidade
+            </th>
+
+            <th>Status</th>
+
+            <th class="text-end">
+              Ações
+            </th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          @for (
+            aplicacao of aplicacoes;
+            track aplicacao.id
+          ) {
+
+            <tr>
+
+              <td>
+                <strong>
+                  {{ aplicacao.nome }}
+                </strong>
+              </td>
+
+              <td>
+                {{ aplicacao.instituicao }}
+              </td>
+
+              <td>
+                {{ aplicacao.tipoDescricao }}
+              </td>
+
+              <td class="text-end">
+
+                {{
+                  aplicacao.capitalLiquido
+                    | currency:'BRL'
+                }}
+
+              </td>
+
+              <td class="text-end">
+
+                {{
+                  aplicacao.valorAtual
+                    | currency:'BRL'
+                }}
+
+              </td>
+
+              <td
+                class="text-end"
+                [class.text-success]="aplicacao.resultado > 0"
+                [class.text-danger]="aplicacao.resultado < 0">
+
+                {{
+                  aplicacao.resultado
+                    | currency:'BRL'
+                }}
+
+              </td>
+
+              <td
+                class="text-end"
+                [class.text-success]="
+                  aplicacao.rentabilidadePercentual > 0
+                "
+                [class.text-danger]="
+                  aplicacao.rentabilidadePercentual < 0
+                ">
+
+                {{
+                  aplicacao.rentabilidadePercentual
+                    | number:'1.2-2'
+                }}%
+
+              </td>
+
+              <td>
+
+                @if (aplicacao.ativa) {
+
+                  <span class="badge text-bg-success">
+                    Ativa
+                  </span>
+
+                } @else {
+
+                  <span class="badge text-bg-secondary">
+                    Inativa
+                  </span>
+
+                }
+
+              </td>
+
+              <td class="text-end">
+
+                <div class="btn-group btn-group-sm">
+
+                  <a
+                    [routerLink]="[
+                      '/aplicacoes',
+                      aplicacao.id,
+                      'movimentar'
+                    ]"
+                    class="btn btn-outline-success">
+
+                    Movimentar
+
+                  </a>
+
+                  <a
+                    [routerLink]="[
+                      '/aplicacoes',
+                      aplicacao.id,
+                      'historico'
+                    ]"
+                    class="btn btn-outline-secondary">
+
+                    Histórico
+
+                  </a>
+
+                  <a
+                    [routerLink]="[
+                      '/aplicacoes',
+                      aplicacao.id,
+                      'editar'
+                    ]"
+                    class="btn btn-outline-primary">
+
+                    Editar
+
+                  </a>
+
+                  @if (aplicacao.ativa) {
+
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger"
+                      (click)="desativar(aplicacao)">
+
+                      Desativar
+
+                    </button>
+
+                  }
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</div>

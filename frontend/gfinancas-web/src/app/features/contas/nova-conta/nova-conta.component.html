@@ -1,0 +1,146 @@
+<div class="container app-page">
+
+  <div class="row justify-content-center">
+
+    <div class="col-lg-7">
+
+      <div class="card shadow-sm">
+
+        <div class="card-body">
+
+          <h2 class="mb-4">
+            Nova Conta
+          </h2>
+
+          @if (erro) {
+            <div class="alert alert-danger">
+              {{ erro }}
+            </div>
+          }
+
+          <form
+            [formGroup]="form"
+            (ngSubmit)="salvar()">
+
+            <div class="mb-3">
+
+              <label
+                for="nome"
+                class="form-label">
+                Nome
+              </label>
+
+              <input
+                id="nome"
+                type="text"
+                class="form-control"
+                formControlName="nome"
+                placeholder="Ex.: Conta Principal">
+
+              @if (
+                form.controls.nome.touched &&
+                form.controls.nome.invalid
+              ) {
+                <div class="text-danger mt-1">
+                  Informe o nome da conta.
+                </div>
+              }
+
+            </div>
+
+
+            <div class="mb-3">
+
+              <label
+                for="saldoInicial"
+                class="form-label">
+                Saldo inicial
+              </label>
+
+              <input
+                id="saldoInicial"
+                type="number"
+                step="0.01"
+                class="form-control"
+                formControlName="saldoInicial">
+
+            </div>
+
+
+            <div class="mb-4">
+
+              <label
+                for="tipoContaId"
+                class="form-label">
+                Tipo da conta
+              </label>
+
+              <select
+                id="tipoContaId"
+                class="form-select"
+                formControlName="tipoContaId">
+
+                <option [ngValue]="null">
+                  Selecione...
+                </option>
+
+                @for (
+                  tipo of tiposConta;
+                  track tipo.id
+                ) {
+
+                  <option [ngValue]="tipo.id">
+                    {{ tipo.nome }}
+                  </option>
+
+                }
+
+              </select>
+
+              @if (
+                form.controls.tipoContaId.touched &&
+                form.controls.tipoContaId.invalid
+              ) {
+                <div class="text-danger mt-1">
+                  Selecione o tipo da conta.
+                </div>
+              }
+
+            </div>
+
+
+            <div class="d-flex justify-content-end gap-2">
+
+              <a
+                routerLink="/contas"
+                class="btn btn-outline-secondary">
+                Cancelar
+              </a>
+
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="salvando">
+
+                @if (salvando) {
+                  Salvando...
+                }
+                @else {
+                  Salvar
+                }
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

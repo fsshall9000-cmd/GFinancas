@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GFinancas.API/GFinancas.API.csproj" />
+    <Project Path="src/GFinancas.Application/GFinancas.Application.csproj" />
+    <Project Path="src/GFinancas.Domain/GFinancas.Domain.csproj" />
+    <Project Path="src/GFinancas.Infrastructure/GFinancas.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GFinancas.Tests/GFinancas.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,20 @@
+# .NET
+**/bin/
+**/obj/
+.vs/
+
+# Angular
+**/node_modules/
+**/.angular/
+**/dist/
+
+# Configurações locais
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/.env
+**/.env.*
+!**/.env.example
+
+# Temporários
+*.log
+*.tmp

@@ -1,0 +1,162 @@
+<div class="container app-page">
+
+  <div class="mb-4 page-header">
+    <h2>Novo orçamento</h2>
+
+    <p class="text-muted">
+      Defina um limite mensal para uma categoria de despesa.
+    </p>
+  </div>
+
+  @if (mensagemErro) {
+    <div class="alert alert-danger">
+      {{ mensagemErro }}
+    </div>
+  }
+
+  <div class="card">
+
+    <div class="card-body">
+
+      <form (ngSubmit)="salvar()">
+
+        <div class="row g-3">
+
+          <div class="col-md-6">
+
+            <label class="form-label">
+              Categoria
+            </label>
+
+            <select
+              class="form-select"
+              name="categoriaId"
+              [(ngModel)]="orcamento.categoriaId"
+              required>
+
+              <option [ngValue]="0">
+                Selecione uma categoria
+              </option>
+
+              @for (
+                categoria of categorias;
+                track categoria.id
+              ) {
+
+                <option [ngValue]="categoria.id">
+                  {{ categoria.nome }}
+                </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <div class="col-md-3">
+
+            <label class="form-label">
+              Mês
+            </label>
+
+            <select
+              class="form-select"
+              name="mes"
+              [(ngModel)]="orcamento.mes"
+              required>
+
+              <option [ngValue]="1">Janeiro</option>
+              <option [ngValue]="2">Fevereiro</option>
+              <option [ngValue]="3">Março</option>
+              <option [ngValue]="4">Abril</option>
+              <option [ngValue]="5">Maio</option>
+              <option [ngValue]="6">Junho</option>
+              <option [ngValue]="7">Julho</option>
+              <option [ngValue]="8">Agosto</option>
+              <option [ngValue]="9">Setembro</option>
+              <option [ngValue]="10">Outubro</option>
+              <option [ngValue]="11">Novembro</option>
+              <option [ngValue]="12">Dezembro</option>
+
+            </select>
+
+          </div>
+
+
+          <div class="col-md-3">
+
+            <label class="form-label">
+              Ano
+            </label>
+
+            <input
+              type="number"
+              class="form-control"
+              name="ano"
+              [(ngModel)]="orcamento.ano"
+              min="1"
+              max="9999"
+              required>
+
+          </div>
+
+
+          <div class="col-md-6">
+
+            <label class="form-label">
+              Limite mensal
+            </label>
+
+            <div class="input-group">
+
+              <span class="input-group-text">
+                R$
+              </span>
+
+              <input
+                type="number"
+                class="form-control"
+                name="valorLimite"
+                [(ngModel)]="orcamento.valorLimite"
+                min="0.01"
+                step="0.01"
+                required>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="mt-4">
+
+          <button
+            type="submit"
+            class="btn btn-primary me-2"
+            [disabled]="salvando">
+
+            @if (salvando) {
+              Salvando...
+            } @else {
+              Salvar
+            }
+
+          </button>
+
+          <a
+            routerLink="/orcamentos"
+            class="btn btn-outline-secondary">
+            Cancelar
+          </a>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>

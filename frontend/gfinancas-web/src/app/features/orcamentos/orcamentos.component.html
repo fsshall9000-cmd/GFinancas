@@ -1,0 +1,338 @@
+<div class="container app-page">
+
+  <div
+    class="d-flex justify-content-between
+           align-items-center mb-4 page-header">
+
+    <div>
+      <h2>Orçamento mensal</h2>
+
+      <p class="text-muted mb-0">
+        Acompanhe seus limites de gastos por categoria.
+      </p>
+    </div>
+
+    <a
+      routerLink="/orcamentos/novo"
+      [queryParams]="{
+        ano: ano,
+        mes: mes
+    }"
+      class="btn btn-primary">
+
+      Novo orçamento
+
+    </a>
+
+  </div>
+
+
+  @if (mensagemErro) {
+
+    <div class="alert alert-danger">
+      {{ mensagemErro }}
+    </div>
+
+  }
+
+  <div class="card mb-4">
+
+  <div class="card-body">
+
+    <div class="row g-3 align-items-end">
+
+      <div class="col-md-4">
+
+        <label class="form-label">
+          Mês
+        </label>
+
+        <select
+          class="form-select"
+          [(ngModel)]="mes">
+
+          @for (item of meses; track item.valor) {
+
+            <option [ngValue]="item.valor">
+              {{ item.nome }}
+            </option>
+
+          }
+
+        </select>
+
+      </div>
+
+
+      <div class="col-md-4">
+
+        <label class="form-label">
+          Ano
+        </label>
+
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="ano"
+          min="1"
+          max="9999">
+
+      </div>
+
+
+      <div class="col-md-4">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="filtrar()">
+
+          Consultar
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- RESUMO -->
+
+  <div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+
+      <div class="card h-100">
+
+        <div class="card-body">
+
+          <span class="text-muted">
+            Total planejado
+          </span>
+
+          <h3 class="mt-2">
+            {{
+              totalPlanejado
+                | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+            }}
+          </h3>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+      <div class="card h-100">
+
+        <div class="card-body">
+
+          <span class="text-muted">
+            Total gasto
+          </span>
+
+          <h3 class="mt-2">
+            {{
+              totalGasto
+                | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+            }}
+          </h3>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+      <div class="card h-100">
+
+        <div class="card-body">
+
+          <span class="text-muted">
+            Disponível
+          </span>
+
+          <h3
+            class="mt-2"
+            [class.text-danger]="totalDisponivel < 0"
+            [class.text-success]="totalDisponivel >= 0">
+
+            {{
+              totalDisponivel
+                | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+            }}
+
+          </h3>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  @if (carregando) {
+
+    <div class="text-center py-5">
+      Carregando orçamentos...
+    </div>
+
+  } @else if (orcamentos.length === 0) {
+
+    <div class="alert alert-info">
+
+      Nenhum orçamento cadastrado para
+      {{ mes }}/{{ ano }}.
+
+    </div>
+
+  } @else {
+
+    <div class="card">
+
+      <div class="card-body">
+
+        <div class="table-responsive">
+
+          <table
+            class="table table-hover align-middle">
+
+            <thead>
+
+              <tr>
+                <th>Categoria</th>
+                <th>Limite</th>
+                <th>Gasto</th>
+                <th>Disponível</th>
+                <th style="min-width: 220px;">
+                  Utilização
+                </th>
+                <th>Ações</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              @for (
+                orcamento of orcamentos;
+                track orcamento.id
+              ) {
+
+                <tr>
+
+                  <td>
+                    {{ orcamento.categoria }}
+                  </td>
+
+                  <td>
+                    {{
+                      orcamento.valorLimite
+                        | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      orcamento.valorGasto
+                        | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+                    }}
+                  </td>
+
+                  <td
+                    [class.text-danger]="
+                      orcamento.valorDisponivel < 0
+                    "
+                    [class.text-success]="
+                      orcamento.valorDisponivel >= 0
+                    ">
+
+                    {{
+                      orcamento.valorDisponivel
+                        | currency:'BRL':'symbol':'1.2-2':'pt-BR'
+                    }}
+
+                  </td>
+
+                  <td>
+
+                    <div class="progress">
+
+                      <div
+                        class="progress-bar"
+                        [class.bg-danger]="
+                          orcamento.percentualUtilizado > 100
+                        "
+                        [style.width.%]="
+                          larguraProgresso(
+                            orcamento.percentualUtilizado
+                          )
+                        ">
+
+                      </div>
+
+                    </div>
+
+                    <small class="text-muted">
+
+                      {{
+                        orcamento.percentualUtilizado
+                          | number:'1.0-2'
+                      }}%
+
+                    </small>
+
+                  </td>
+
+                  <td>
+
+                    <a
+                      [routerLink]="[
+                        '/orcamentos/editar',
+                        orcamento.id
+                      ]"
+                      class="btn btn-sm btn-outline-primary me-2">
+
+                      Editar
+
+                    </a>
+
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="remover(orcamento.id)">
+
+                      Excluir
+
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

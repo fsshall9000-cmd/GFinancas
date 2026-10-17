@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+.usuario-nome {
+  max-width: 45%;
+  overflow-wrap: anywhere;
+  text-align: right;
+}

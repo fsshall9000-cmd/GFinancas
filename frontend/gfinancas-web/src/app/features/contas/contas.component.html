@@ -1,0 +1,185 @@
+<div class="container app-page">
+
+  <div
+    class="d-flex justify-content-between
+           align-items-center mb-4 page-header">
+
+    <div>
+      <h2>Contas</h2>
+
+      <p class="text-muted">
+        Gerencie suas contas financeiras.
+      </p>
+    </div>
+  <a
+    routerLink="/contas/nova"
+    class="btn btn-primary">
+    + Nova conta
+  </a>
+
+  </div>
+
+
+  @if (erro) {
+
+    <div class="alert alert-danger">
+      {{ erro }}
+    </div>
+
+  }
+
+
+  @if (carregando) {
+
+    <div class="text-center py-4">
+
+      <div
+        class="spinner-border"
+        role="status">
+      </div>
+
+      <p class="mt-2">
+        Carregando contas...
+      </p>
+
+    </div>
+
+  }
+
+
+  @if (!carregando) {
+
+    <div class="card shadow-sm">
+
+      <div class="card-body">
+
+        <div class="table-responsive">
+
+          <table
+            class="table table-hover align-middle">
+
+            <thead>
+
+              <tr>
+
+                <th>Conta</th>
+
+                <th>Tipo</th>
+
+                <th class="text-end">
+                  Saldo inicial
+                </th>
+
+                <th class="text-end">
+                  Saldo atual
+                </th>
+
+                <th class="text-end">
+                  Ações
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              @for (
+                conta of contas;
+                track conta.id
+              ) {
+
+                <tr>
+
+                  <td>
+                    {{ conta.nome }}
+                  </td>
+
+                  <td>
+                    {{ conta.tipoConta }}
+                  </td>
+
+                  <td class="text-end">
+
+                    {{
+                      conta.saldoInicial
+                        | currency:'BRL'
+                    }}
+
+                  </td>
+
+                  <td class="text-end fw-semibold">
+
+                    @if (
+                      conta.saldoAtual !== undefined
+                    ) {
+
+                      {{
+                        conta.saldoAtual
+                          | currency:'BRL'
+                      }}
+
+                    }
+                    @else {
+
+                      <span
+                        class="text-muted">
+                        Calculando...
+                      </span>
+
+                    }
+
+                  </td>
+
+
+                  <td class="text-end">
+
+                   <a
+                      [routerLink]="['/contas/editar', conta.id]"
+                      class="btn btn-sm btn-outline-primary me-2">
+                        Editar
+                  </a>
+
+                 <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="excluirConta(conta)">
+                        Excluir
+                  </button>
+
+                  </td>
+
+                </tr>
+
+              }
+              @empty {
+
+                <tr>
+
+                  <td
+                    colspan="5"
+                    class="text-center
+                           text-muted py-4">
+
+                    Nenhuma conta cadastrada.
+
+                  </td>
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

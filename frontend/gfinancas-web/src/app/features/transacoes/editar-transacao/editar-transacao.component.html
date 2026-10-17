@@ -1,0 +1,214 @@
+<div class="container app-page">
+
+  <div class="mb-4 page-header">
+
+    <h2>Editar Transação</h2>
+
+    <p class="text-muted">
+      Altere os dados da transação
+    </p>
+
+  </div>
+
+
+  @if (erro) {
+
+    <div class="alert alert-danger">
+      {{ erro }}
+    </div>
+
+  }
+
+
+  @if (carregando) {
+
+    <div class="alert alert-info">
+      Carregando transação...
+    </div>
+
+  } @else {
+
+    <div class="card shadow-sm">
+
+      <div class="card-body">
+
+        <form
+          [formGroup]="formulario"
+          (ngSubmit)="salvar()">
+
+
+          <div class="mb-3">
+
+            <label class="form-label">
+              Descrição
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              formControlName="descricao">
+
+            @if (
+              formulario.get('descricao')?.touched &&
+              formulario.get('descricao')?.invalid
+            ) {
+
+              <small class="text-danger">
+                Informe a descrição.
+              </small>
+
+            }
+
+          </div>
+
+
+          <div class="mb-3">
+
+            <label class="form-label">
+              Valor
+            </label>
+
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              class="form-control"
+              formControlName="valor">
+
+          </div>
+
+
+          <div class="mb-3">
+
+            <label class="form-label">
+              Data
+            </label>
+
+            <input
+              type="date"
+              class="form-control"
+              formControlName="data">
+
+          </div>
+
+
+          <div class="mb-3">
+
+            <label class="form-label">
+              Tipo
+            </label>
+
+            <select
+              class="form-select"
+              formControlName="tipo">
+
+              <option [ngValue]="1">
+                Receita
+              </option>
+
+              <option [ngValue]="2">
+                Despesa
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="mb-3">
+
+            <label class="form-label">
+              Conta
+            </label>
+
+            <select
+              class="form-select"
+              formControlName="contaId">
+
+              <option [ngValue]="null">
+                Selecione uma conta
+              </option>
+
+              @for (
+                conta of contas;
+                track conta.id
+              ) {
+
+                <option [ngValue]="conta.id">
+                  {{ conta.nome }}
+                </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <div class="mb-4">
+
+            <label class="form-label">
+              Categoria
+            </label>
+
+            <select
+              class="form-select"
+              formControlName="categoriaId">
+
+              <option [ngValue]="null">
+                Selecione uma categoria
+              </option>
+
+              @for (
+                categoria of categoriasFiltradas;
+                track categoria.id
+              ) {
+
+                <option [ngValue]="categoria.id">
+                  {{ categoria.nome }}
+                </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <div
+            class="d-flex justify-content-end gap-2">
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="cancelar()">
+
+              Cancelar
+
+            </button>
+
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="salvando">
+
+              @if (salvando) {
+                Salvando...
+              } @else {
+                Salvar alterações
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

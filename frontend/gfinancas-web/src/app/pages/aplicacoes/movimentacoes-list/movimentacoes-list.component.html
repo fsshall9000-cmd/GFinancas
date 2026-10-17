@@ -1,0 +1,377 @@
+<div class="container app-page">
+
+  <!-- CABEÇALHO -->
+
+  <div
+    class="d-flex justify-content-between
+           align-items-center mb-4 page-header">
+
+    <div>
+
+      <h2 class="mb-1">
+        Histórico de movimentações
+      </h2>
+
+      @if (aplicacao) {
+
+        <p class="text-muted mb-0">
+
+          {{ aplicacao.nome }}
+
+          •
+
+          {{ aplicacao.instituicao }}
+
+        </p>
+
+      }
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+      @if (aplicacao?.ativa) {
+
+        <a
+          [routerLink]="[
+            '/aplicacoes',
+            aplicacaoId,
+            'movimentar'
+          ]"
+          class="btn btn-success">
+
+          Nova movimentação
+
+        </a>
+
+      }
+
+      <a
+        routerLink="/aplicacoes"
+        class="btn btn-outline-secondary">
+
+        Voltar
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- ERRO -->
+
+  @if (mensagemErro) {
+
+    <div class="alert alert-danger">
+      {{ mensagemErro }}
+    </div>
+
+  }
+
+
+  <!-- CARREGANDO -->
+
+  @if (carregando) {
+
+    <div class="text-center py-5">
+
+      <div
+        class="spinner-border"
+        role="status">
+      </div>
+
+      <p class="text-muted mt-2">
+        Carregando histórico...
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- CONTEÚDO -->
+
+  @if (!carregando && aplicacao) {
+
+
+    <!-- RESUMO -->
+
+    <div class="row g-3 mb-4">
+
+
+      <!-- TOTAL APORTADO -->
+
+      <div class="col-md-3">
+
+        <div class="card h-100">
+
+          <div class="card-body">
+
+            <small class="text-muted">
+              Total aportado
+            </small>
+
+            <h5
+              class="mb-0 text-success">
+
+              {{
+                aplicacao.totalAportado
+                  | currency:'BRL'
+              }}
+
+            </h5>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- TOTAL RESGATADO -->
+
+      <div class="col-md-3">
+
+        <div class="card h-100">
+
+          <div class="card-body">
+
+            <small class="text-muted">
+              Total resgatado
+            </small>
+
+            <h5 class="mb-0">
+
+              {{
+                aplicacao.totalResgatado
+                  | currency:'BRL'
+              }}
+
+            </h5>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- CAPITAL LÍQUIDO -->
+
+      <div class="col-md-3">
+
+        <div class="card h-100">
+
+          <div class="card-body">
+
+            <small class="text-muted">
+              Capital líquido
+            </small>
+
+            <h5 class="mb-0">
+
+              {{
+                aplicacao.capitalLiquido
+                  | currency:'BRL'
+              }}
+
+            </h5>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- VALOR ATUAL -->
+
+      <div class="col-md-3">
+
+        <div class="card h-100">
+
+          <div class="card-body">
+
+            <small class="text-muted">
+              Valor atual
+            </small>
+
+            <h5 class="mb-0">
+
+              {{
+                aplicacao.valorAtual
+                  | currency:'BRL'
+              }}
+
+            </h5>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SEM MOVIMENTAÇÕES -->
+
+    @if (movimentacoes.length === 0) {
+
+      <div class="alert alert-light border">
+
+        <strong>
+          Nenhuma movimentação registrada.
+        </strong>
+
+        <div class="text-muted mt-1">
+          Faça o primeiro aporte para começar
+          a movimentar esta aplicação.
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- TABELA -->
+
+    @if (movimentacoes.length > 0) {
+
+      <div class="card shadow-sm">
+
+        <div class="card-body p-0">
+
+          <div class="table-responsive">
+
+            <table
+              class="table table-hover
+                     align-middle mb-0">
+
+              <thead class="table-light">
+
+                <tr>
+
+                  <th>
+                    Data
+                  </th>
+
+                  <th>
+                    Tipo
+                  </th>
+
+                  <th class="text-end">
+                    Valor
+                  </th>
+
+                  <th class="text-end">
+                    Conta
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                @for (
+                  movimentacao of movimentacoes;
+                  track movimentacao.id
+                ) {
+
+                  <tr>
+
+
+                    <!-- DATA -->
+
+                    <td>
+
+                      {{
+                        movimentacao.data
+                          | date:'dd/MM/yyyy'
+                      }}
+
+                    </td>
+
+
+                    <!-- TIPO -->
+
+                    <td>
+
+                      @if (
+                        ehAporte(movimentacao)
+                      ) {
+
+                        <span
+                          class="badge text-bg-success">
+
+                          Aporte
+
+                        </span>
+
+                      }
+
+                      @if (
+                        ehResgate(movimentacao)
+                      ) {
+
+                        <span
+                          class="badge text-bg-primary">
+
+                          Resgate
+
+                        </span>
+
+                      }
+
+                    </td>
+
+
+                    <!-- VALOR -->
+
+                    <td
+                      class="text-end fw-semibold"
+                      [class.text-success]="
+                        ehAporte(movimentacao)
+                      "
+                      [class.text-primary]="
+                        ehResgate(movimentacao)
+                      ">
+
+                      {{
+                        movimentacao.valor
+                          | currency:'BRL'
+                      }}
+
+                    </td>
+
+
+                    <!-- CONTA -->
+
+                    <td class="text-end">
+
+                     {{ movimentacao.conta }}
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+  }
+
+</div>
